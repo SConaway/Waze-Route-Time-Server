@@ -1,0 +1,1 @@
+cmd: docker build -t waze . ; python3 -m py_compile main.py
