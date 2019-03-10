@@ -1,6 +1,25 @@
 #!/usr/bin/env python3
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import yaml
+import os.path
+
+yamlFilePath = "example-config.yaml"
+
+if os.path.isfile("config.yml"):
+    yamlFilePath = "config.yml"
+
+if os.path.isfile("config.yaml"):
+    yamlFilePath = "config.yaml"
+
+with open(yamlFilePath, 'r') as f:
+    config = yaml.load(f)
+# print(config)
+# for route in config:
+#     print(config[route])
+#     print(config[route]["from"])
+#     print(config[route]["to"])
+#     print(config[route]["region"])
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):

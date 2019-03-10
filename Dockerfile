@@ -2,7 +2,7 @@ FROM python:3-alpine
 
 WORKDIR /app
 
-RUN ["pip", "install", "WazeRouteCalculator"]
+RUN ["pip", "install", "WazeRouteCalculator ", "pyyaml"]
 
 COPY *.py /app/
 
