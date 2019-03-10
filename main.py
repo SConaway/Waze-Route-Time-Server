@@ -81,4 +81,7 @@ def startServer():
 
 
 getTimes()
-# startServer()
+
+if "travis" not in os.environ:
+    pass
+    # startServer()
