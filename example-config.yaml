@@ -1,8 +1,10 @@
 example1:
+    name: "Budapest -> Gyor"
     from: 'Budapest, Hungary'
     to: 'Gyor, Hungary'
     region: 'EU'
 example2:
+    name: "Yankee Stadium -> Empire State Building"
     from: '1 E 161st St, Bronx, NY 10451'
     to: '20 W 34th St, New York, NY 10001'
     region: 'US'

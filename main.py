@@ -7,8 +7,10 @@ import yaml
 import os.path
 import time
 import logging
+import json
 
-logging.basicConfig(level=logging.INFO)
+logLevel = logging.DEBUG
+logging.basicConfig(level=logLevel)
 
 
 yamlFilePath = "example-config.yaml"
@@ -23,14 +25,18 @@ message = '{"message": "Check back later. Server is still starting."}'
 
 def getTime(from_address, to_address, region):
     route = WazeRouteCalculator.WazeRouteCalculator(
-        from_address, to_address, region, log_lvl=None)
+        from_address, to_address, region, log_lvl=logLevel)
     try:
         results = route.calc_route_info()
     except WazeRouteCalculator.WRCError as err:
         logging.info("Sleeping for 10 seconds due to error: " + str(err))
         time.sleep(10)
         results = getTime(from_address, to_address, region)
-    return(round(results[0], 2), round(results[1], 2))
+    if region == "US" or region == "NA":
+        units = "mi"
+    else:
+        units = "km"
+    return(round(results[0], 2), round(results[1], 2), units)
 
 
 def getTimes():
@@ -38,11 +44,28 @@ def getTimes():
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
     logging.info(config)
+    data = {}
+    # data['key'] = 'value'
+    json_data = json.dumps(data)
+    i = 0
     for route in config:
+        i = i + 1
         logging.info(config[route])
-        print(getTime(config[route]["from"], config[route]
-                      ["to"], config[route]["region"]))
+        routeTime, routeDist, routeUnits = getTime(
+            config[route]["from"],
+            config[route]["to"],
+            config[route]["region"])
+        logging.info("Time: %s minutes, Distance: %s %s",
+                     routeTime, routeDist, routeUnits)
+        str = {}
+        str['name'] = config[route]["name"]
+        str['time'] = routeTime
+        str['dist'] = routeDist
+        str['units'] = routeUnits
+        data[i] = str
         time.sleep(1)
+    json_data = json.dumps(data)
+    print(json_data)
     return "hello"
 
 
@@ -77,12 +100,12 @@ def startServer():
     httpd.serve_forever()
 
 
-formatMessage(getTimes)
-threading.Timer(5.0, formatMessage(getTimes)).start()
+if __name__ == '__main__':
+    formatMessage(getTimes)
+    threading.Timer(5.0, formatMessage(getTimes)).start()
 
-
-if "TRAVIS" not in os.environ:
-    pass
-    startServer()
-else:
-    time.sleep(60)
+    if "TRAVIS" not in os.environ:
+        pass
+        # startServer()
+    else:
+        time.sleep(60)
