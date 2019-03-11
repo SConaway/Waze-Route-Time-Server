@@ -91,3 +91,5 @@ threading.Timer(5.0, formatMessage(getTimes)).start()
 if "TRAVIS" not in os.environ:
     pass
     startServer()
+else:
+    time.sleep(60)
