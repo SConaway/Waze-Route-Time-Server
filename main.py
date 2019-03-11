@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import threading
 import WazeRouteCalculator
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import yaml
 import os.path
 import time
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 yamlFilePath = "example-config.yaml"
 
@@ -24,7 +25,7 @@ def getTime(from_address, to_address, region):
     try:
         results = route.calc_route_info()
     except WazeRouteCalculator.WRCError as err:
-        print("Sleeping for 10 seconds due to error: " + err)
+        print("Sleeping for 10 seconds due to error: " + str(err))
         time.sleep(10)
         results = getTime(from_address, to_address, region)
     return(round(results[0], 2), round(results[1], 2))
@@ -72,7 +73,9 @@ def startServer():
     httpd.serve_forever()
 
 
-getTimes()
+formatMessage(getTimes)
+threading.Timer(5.0, formatMessage(getTimes)).start()
+
 
 if "travis" not in os.environ:
     pass
