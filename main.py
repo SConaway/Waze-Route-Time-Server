@@ -8,23 +8,16 @@ import os.path
 import time
 import logging
 
-log = logging.getLogger(__name__)
-log_lvl = logging.INFO
-try:
-    log.setLevel(log_lvl)
-except NameError:
-    log_lvl = logging.WARNING
-    log.setLevel(log_lvl)
+logging.basicConfig(level=logging.INFO)
 
 
 yamlFilePath = "example-config.yaml"
-
 if os.path.isfile("config.yml"):
     yamlFilePath = "config.yml"
-
 if os.path.isfile("config.yaml"):
     yamlFilePath = "config.yaml"
-log.info("Config File: %s", yamlFilePath)
+logging.info("Config File: %s", yamlFilePath)
+
 message = '{"message": "Check back later. Server is still starting."}'
 
 
@@ -34,21 +27,22 @@ def getTime(from_address, to_address, region):
     try:
         results = route.calc_route_info()
     except WazeRouteCalculator.WRCError as err:
-        log.info("Sleeping for 10 seconds due to error: " + str(err))
+        logging.info("Sleeping for 10 seconds due to error: " + str(err))
         time.sleep(10)
         results = getTime(from_address, to_address, region)
     return(round(results[0], 2), round(results[1], 2))
 
 
 def getTimes():
-    log.info("Getting Times")
+    logging.info("Getting Times")
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
-    log.info(config)
+    logging.info(config)
     for route in config:
-        log.info(config[route])
+        logging.info(config[route])
         print(getTime(config[route]["from"], config[route]
                       ["to"], config[route]["region"]))
+        time.sleep(1)
     return "hello"
 
 
@@ -66,21 +60,20 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         # Send headers
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        # Send message back to client
-        # Write content as utf-8 data
+        # Send message back to client as utf-8 data
         self.wfile.write(bytes(message, "utf8"))
         return
 
 
 def startServer():
-    log.info('starting server...')
+    logging.info('starting server...')
 
     # Server settings
     # Choose port 8081, for port 80, which is normally used for
     # a http server, you need root access
     server_address = ('127.0.0.1', 8081)
     httpd = HTTPServer(server_address, HTTPServer_RequestHandler)
-    log.info('running server...')
+    logging.info('running server...')
     httpd.serve_forever()
 
 
