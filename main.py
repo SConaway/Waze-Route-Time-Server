@@ -15,14 +15,7 @@ if os.path.isfile("config.yml"):
 if os.path.isfile("config.yaml"):
     yamlFilePath = "config.yaml"
 
-# with open(yamlFilePath, 'r') as f:
-#     config = yaml.load(f)
-# print(config)
-# for route in config:
-#     print(config[route])
-#     print(config[route]["from"])
-#     print(config[route]["to"])
-#     print(config[route]["region"])
+message = "{'message': 'Check back later. Server is still starting.'}"
 
 
 def getTime(from_address, to_address, region):
@@ -30,25 +23,25 @@ def getTime(from_address, to_address, region):
         from_address, to_address, region, log_lvl=None)
     try:
         results = route.calc_route_info()
-        print(results)
     except WazeRouteCalculator.WRCError as err:
-        print("nope")
+        print("Sleeping for 10 seconds due to error: " + err)
         time.sleep(10)
-        getTime(from_address, to_address, region)
+        results = getTime(from_address, to_address, region)
+    return(round(results[0], 2), round(results[1], 2))
 
 
 def getTimes():
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
-    # print(config)
     for route in config:
         print(config[route])
-        # print(config[route]["from"])
-        # print(config[route]["to"])
-        # print(config[route]["region"])
-        getTime(config[route]["from"], config[route]
-                ["to"], config[route]["region"])
+        print(getTime(config[route]["from"], config[route]
+                      ["to"], config[route]["region"]))
     return "hello"
+
+
+def formatMessage(times):
+    return times
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
@@ -62,7 +55,6 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         # Send message back to client
-        message = getTimes()
         # Write content as utf-8 data
         self.wfile.write(bytes(message, "utf8"))
         return
@@ -84,4 +76,4 @@ getTimes()
 
 if "travis" not in os.environ:
     pass
-    # startServer()
+    startServer()
