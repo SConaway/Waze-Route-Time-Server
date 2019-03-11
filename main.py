@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 import WazeRouteCalculator
 import yaml
 import os.path
 import time
+import logging
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+log = logging.getLogger(__name__)
+log_lvl = logging.INFO
+try:
+    log.setLevel(log_lvl)
+except NameError:
+    log_lvl = logging.WARNING
+    log.setLevel(log_lvl)
+
 
 yamlFilePath = "example-config.yaml"
 
@@ -15,8 +24,8 @@ if os.path.isfile("config.yml"):
 
 if os.path.isfile("config.yaml"):
     yamlFilePath = "config.yaml"
-
-message = "{'message': 'Check back later. Server is still starting.'}"
+log.info("Config File: %s", yamlFilePath)
+message = '{"message": "Check back later. Server is still starting."}'
 
 
 def getTime(from_address, to_address, region):
@@ -25,17 +34,19 @@ def getTime(from_address, to_address, region):
     try:
         results = route.calc_route_info()
     except WazeRouteCalculator.WRCError as err:
-        print("Sleeping for 10 seconds due to error: " + str(err))
+        log.info("Sleeping for 10 seconds due to error: " + str(err))
         time.sleep(10)
         results = getTime(from_address, to_address, region)
     return(round(results[0], 2), round(results[1], 2))
 
 
 def getTimes():
+    log.info("Getting Times")
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
+    log.info(config)
     for route in config:
-        print(config[route])
+        log.info(config[route])
         print(getTime(config[route]["from"], config[route]
                       ["to"], config[route]["region"]))
     return "hello"
@@ -62,14 +73,14 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
 
 
 def startServer():
-    print('starting server...')
+    log.info('starting server...')
 
     # Server settings
     # Choose port 8081, for port 80, which is normally used for
     # a http server, you need root access
     server_address = ('127.0.0.1', 8081)
     httpd = HTTPServer(server_address, HTTPServer_RequestHandler)
-    print('running server...')
+    log.info('running server...')
     httpd.serve_forever()
 
 
