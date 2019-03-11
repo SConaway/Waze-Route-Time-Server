@@ -77,6 +77,6 @@ formatMessage(getTimes)
 threading.Timer(5.0, formatMessage(getTimes)).start()
 
 
-if "travis" not in os.environ:
+if "TRAVIS" not in os.environ:
     pass
     startServer()
