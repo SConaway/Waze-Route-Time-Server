@@ -41,6 +41,7 @@ def getTime(from_address, to_address, region):
 
 def getTimes():
     logging.info("Getting Times")
+    print("hi")
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
     logging.info(config)
@@ -65,12 +66,15 @@ def getTimes():
         data[i] = str
         time.sleep(1)
     json_data = json.dumps(data)
-    print(json_data)
-    return "hello"
+    logging.info(json_data)
+    message = json_data
+    return json_data
 
 
-def formatMessage(times):
-    return times
+def refresh():
+    while True:
+        getTimes()
+        time.sleep(60)
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
@@ -101,11 +105,16 @@ def startServer():
 
 
 if __name__ == '__main__':
-    formatMessage(getTimes)
-    threading.Timer(5.0, formatMessage(getTimes)).start()
+    # formatMessage(getTimes)
+    # threading.Timer(5.0, formatMessage(getTimes)).start()
+    # threading.Timer(5.0, getTimes).start()
+    thread1 = threading.Thread(target=refresh)
+    thread1.start()
+    # thread1.join()
 
     if "TRAVIS" not in os.environ:
-        pass
-        # startServer()
+        thread2 = threading.Thread(target=startServer)
+        thread2.start()
+        # thread2.join()
     else:
         time.sleep(60)
