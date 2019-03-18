@@ -109,6 +109,7 @@ if __name__ == '__main__':
     # threading.Timer(5.0, formatMessage(getTimes)).start()
     # threading.Timer(5.0, getTimes).start()
     thread1 = threading.Thread(target=refresh)
+    thread1.daemon = True
     thread1.start()
     # thread1.join()
 
@@ -117,4 +118,4 @@ if __name__ == '__main__':
         thread2.start()
         # thread2.join()
     else:
-        time.sleep(60)
+        time.sleep(300)
