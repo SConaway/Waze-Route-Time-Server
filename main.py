@@ -23,6 +23,21 @@ logging.info("Config File: %s", yamlFilePath)
 message = '{"message": "Check back later. Server is still starting."}'
 
 
+class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
+
+    # GET
+    def do_GET(self):
+        # Send response status code
+        self.send_response(200)
+
+        # Send headers
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        # Send message back to client as utf-8 data
+        self.wfile.write(bytes(message, "utf8"))
+        return
+
+
 def getTime(from_address, to_address, region):
     route = WazeRouteCalculator.WazeRouteCalculator(
         from_address, to_address, region, log_lvl=logLevel)
@@ -71,51 +86,36 @@ def getTimes():
     return json_data
 
 
-def refresh():
+def poll():
     while True:
         getTimes()
         time.sleep(60)
 
 
-class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
-
-    # GET
-    def do_GET(self):
-        # Send response status code
-        self.send_response(200)
-
-        # Send headers
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        # Send message back to client as utf-8 data
-        self.wfile.write(bytes(message, "utf8"))
-        return
-
-
 def startServer():
-    logging.info('starting server...')
+    if "TRAVIS" not in os.environ:
+        logging.info('starting server...')
 
-    # Server settings
-    # Choose port 8081, for port 80, which is normally used for
-    # a http server, you need root access
-    server_address = ('127.0.0.1', 8081)
-    httpd = HTTPServer(server_address, HTTPServer_RequestHandler)
-    logging.info('running server...')
-    httpd.serve_forever()
+        # Server settings
+        # Choose port 8081, for port 80, which is normally used for
+        # a http server, you need root access
+        server_address = ('127.0.0.1', 8081)
+        httpd = HTTPServer(server_address, HTTPServer_RequestHandler)
+        logging.info('running server...')
+        httpd.serve_forever()
+    else:
+        time.sleep(300)
 
 
 if __name__ == '__main__':
     # formatMessage(getTimes)
     # threading.Timer(5.0, formatMessage(getTimes)).start()
     # threading.Timer(5.0, getTimes).start()
-    thread1 = threading.Thread(target=refresh)
-    thread1.daemon = True
-    thread1.start()
-    # thread1.join()
+    pollThread = threading.Thread(target=poll)
+    pollThread.daemon = True
+    pollThread.start()
+    # pollThread.join()
 
-    if "TRAVIS" not in os.environ:
-        thread2 = threading.Thread(target=startServer)
-        thread2.start()
-        # thread2.join()
-    else:
-        time.sleep(300)
+    mainThread = threading.Thread(target=startServer)
+    mainThread.start()
+    # mainThread.join()
