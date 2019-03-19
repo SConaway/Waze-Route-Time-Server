@@ -20,7 +20,13 @@ if os.path.isfile("config.yaml"):
     yamlFilePath = "config.yaml"
 logging.info("Config File: %s", yamlFilePath)
 
-message = '{"message": "Check back later. Server is still starting."}'
+
+class Message():
+    def __init__(self):
+        self.message = '{"message": "Check back later. Server is still starting."}'
+
+    def update(self, m):
+        self.message = m
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
@@ -34,7 +40,7 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         # Send message back to client as utf-8 data
-        self.wfile.write(bytes(message, "utf8"))
+        self.wfile.write(bytes(ms.message, "utf8"))
         return
 
 
@@ -82,7 +88,7 @@ def getTimes():
         time.sleep(1)
     json_data = json.dumps(data)
     logging.info(json_data)
-    message = json_data
+    ms.update(json_data)
     return json_data
 
 
@@ -108,6 +114,7 @@ def startServer():
 
 
 if __name__ == '__main__':
+    ms = Message()
     # formatMessage(getTimes)
     # threading.Timer(5.0, formatMessage(getTimes)).start()
     # threading.Timer(5.0, getTimes).start()
