@@ -1,1 +1,1 @@
-cmd: python3 -m py_compile main.py && travis lint && docker build -t waze .
+cmd: python3 -m py_compile main.py && travis lint # && docker build -t waze .
