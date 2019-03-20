@@ -35,11 +35,23 @@ class Route():
         self.from_address = f
         self.to_address = t
         self.region = re
+        self.color = "default"
+        if self.region == "US" or self.region == "NA":
+            self.units = "mi"
+        else:
+            self.units = "km"
         self.r = WazeRouteCalculator.WazeRouteCalculator(
             self.from_address, self.to_address, self.region, log_lvl=logLevel)
 
     def get_info(self):
-        return self.r.calc_route_info()
+        try:
+            results = self.r.calc_route_info()
+        except WazeRouteCalculator.WRCError as err:
+            logging.info("Sleeping for 10 seconds due to error: " + str(err))
+            time.sleep(10)
+            results = get_info(self.from_address, self.to_address, self.region)
+        return (round(results[0], 2), round(results[1], 2),
+                self.units, self.color)
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
@@ -59,17 +71,7 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
 
 def get_info(from_address, to_address, region):
     r = Route(from_address, to_address, region)
-    try:
-        results = r.get_info()
-    except WazeRouteCalculator.WRCError as err:
-        logging.info("Sleeping for 10 seconds due to error: " + str(err))
-        time.sleep(10)
-        results = get_info(from_address, to_address, region)
-    if region == "US" or region == "NA":
-        units = "mi"
-    else:
-        units = "km"
-    return(round(results[0], 2), round(results[1], 2), units)
+    return r.get_info()
 
 
 def refresh():
