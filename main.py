@@ -7,6 +7,7 @@ import yaml
 import os.path
 import time
 import logging
+import datetime
 import json
 
 logLevel = logging.DEBUG
@@ -84,7 +85,7 @@ def refresh():
     for route in config:
         i = i + 1
         logging.info(config[route])
-        routeTime, routeDist, routeUnits = get_info(
+        routeTime, routeDist, routeUnits, routeColor = get_info(
             config[route]["from"],
             config[route]["to"],
             config[route]["region"])
@@ -95,8 +96,11 @@ def refresh():
         str['time'] = routeTime
         str['dist'] = routeDist
         str['units'] = routeUnits
+        str['color'] = routeColor
         data[i] = str
         time.sleep(1)
+    # TODO: this
+    # data['lastUpdatedTime'] = datetime.datetime.utcnow()
     json_data = json.dumps(data)
     logging.info(json_data)
     ms.update(json_data)
@@ -106,13 +110,12 @@ def refresh():
 def poll():
     while True:
         refresh()
-        time.sleep(600)
+        time.sleep(300)
 
 
 def startServer():
     if "TRAVIS" not in os.environ:
         logging.info('starting server...')
-
         # Server settings
         # Choose port 8081, for port 80, which is normally used for
         # a http server, you need root access
