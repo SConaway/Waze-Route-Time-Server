@@ -128,15 +128,16 @@ def startServer():
 
 
 if __name__ == '__main__':
+    if "TRAVIS" in os.environ:
+        logLevel = logging.DEBUG
+        logging.basicConfig(level=logLevel)
+
     ms = Message()
-    # formatMessage(getTimes)
-    # threading.Timer(5.0, formatMessage(getTimes)).start()
-    # threading.Timer(5.0, getTimes).start()
     pollThread = threading.Thread(target=poll)
     pollThread.daemon = True
     pollThread.start()
-    # pollThread.join()
 
     mainThread = threading.Thread(target=startServer)
     mainThread.start()
-    # mainThread.join()
+
+    mainThread.join()
