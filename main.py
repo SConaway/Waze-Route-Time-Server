@@ -29,6 +29,18 @@ class Message():
         self.message = m
 
 
+class Route():
+    def __init__(self, f, t, re):
+        self.from_address = f
+        self.to_address = t
+        self.region = re
+        self.r = WazeRouteCalculator.WazeRouteCalculator(
+            self.from_address, self.to_address, self.region, log_lvl=logLevel)
+
+    def get_info(self):
+        return self.r.calc_route_info()
+
+
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
 
     # GET
@@ -44,15 +56,14 @@ class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         return
 
 
-def getTime(from_address, to_address, region):
-    route = WazeRouteCalculator.WazeRouteCalculator(
-        from_address, to_address, region, log_lvl=logLevel)
+def get_info(from_address, to_address, region):
+    r = Route(from_address, to_address, region)
     try:
-        results = route.calc_route_info()
+        results = r.get_info()
     except WazeRouteCalculator.WRCError as err:
         logging.info("Sleeping for 10 seconds due to error: " + str(err))
         time.sleep(10)
-        results = getTime(from_address, to_address, region)
+        results = get_info(from_address, to_address, region)
     if region == "US" or region == "NA":
         units = "mi"
     else:
@@ -60,9 +71,9 @@ def getTime(from_address, to_address, region):
     return(round(results[0], 2), round(results[1], 2), units)
 
 
-def getTimes():
+def refresh():
     logging.info("Getting Times")
-    print("hi")
+    # print("hi")
     with open(yamlFilePath, 'r') as f:
         config = yaml.load(f)
     logging.info(config)
@@ -73,7 +84,7 @@ def getTimes():
     for route in config:
         i = i + 1
         logging.info(config[route])
-        routeTime, routeDist, routeUnits = getTime(
+        routeTime, routeDist, routeUnits = get_info(
             config[route]["from"],
             config[route]["to"],
             config[route]["region"])
@@ -94,8 +105,8 @@ def getTimes():
 
 def poll():
     while True:
-        getTimes()
-        time.sleep(60)
+        refresh()
+        time.sleep(600)
 
 
 def startServer():
