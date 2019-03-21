@@ -104,8 +104,7 @@ def refresh():
         str['color'] = routeColor
         data[i] = str
         time.sleep(1)
-    # TODO: this
-    # data['lastUpdatedTime'] = datetime.datetime.utcnow()
+    data['lastUpdatedTime'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     json_data = json.dumps(data)
     logging.info(json_data)
     ms.update(json_data)
