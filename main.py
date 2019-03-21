@@ -14,7 +14,6 @@ import yaml
 logLevel = logging.DEBUG
 logging.basicConfig(level=logLevel)
 
-
 yamlFilePath = "example-config.yaml"
 if os.path.isfile("config.yml"):
     yamlFilePath = "config.yml"
@@ -79,7 +78,10 @@ def refresh():
     logging.info("Getting Times")
     # print("hi")
     with open(yamlFilePath, 'r') as f:
-        config = yaml.load(f)
+        try:
+            config = yaml.safe_load(f)
+        except yaml.YAMLError as exc:
+            logging.error("Error in configuration file: ", exc)
     logging.info(config)
     data = {}
     # data['key'] = 'value'
