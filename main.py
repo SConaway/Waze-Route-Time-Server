@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
-import WazeRouteCalculator
-import yaml
-import os.path
-import time
-import logging
 import datetime
 import json
+import logging
+import os.path
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import WazeRouteCalculator
+import yaml
 
 logLevel = logging.DEBUG
 logging.basicConfig(level=logLevel)
