@@ -50,6 +50,7 @@ class Route():
             logging.info("Sleeping for 10 seconds due to error: " + str(err))
             time.sleep(10)
             results = get_info(self.from_address, self.to_address, self.region)
+        # TODO: convert to miles if unit is mi
         return (round(results[0], 2), round(results[1], 2),
                 self.units, self.color)
 
@@ -84,24 +85,25 @@ def refresh():
             logging.error("Error in configuration file: ", exc)
     logging.info(config)
     data = {}
-    # data['key'] = 'value'
     json_data = json.dumps(data)
     i = 0
     for route in config:
         i = i + 1
         logging.info(config[route])
-        routeTime, routeDist, routeUnits, routeColor = get_info(
+        r = Route(
             config[route]["from"],
             config[route]["to"],
             config[route]["region"])
+        route_time, route_dist, route_units, route_color = r.get_info()
+        del r
         logging.info("Time: %s minutes, Distance: %s %s",
-                     routeTime, routeDist, routeUnits)
-        str = {}
+                     route_time, route_dist, route_units)
+        str = dict()
         str['name'] = config[route]["name"]
-        str['time'] = routeTime
-        str['dist'] = routeDist
-        str['units'] = routeUnits
-        str['color'] = routeColor
+        str['time'] = route_time
+        str['dist'] = route_dist
+        str['units'] = route_units
+        str['color'] = route_color
         data[i] = str
         time.sleep(1)
     data['lastUpdatedTime'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -114,7 +116,7 @@ def refresh():
 def poll():
     while True:
         refresh()
-        time.sleep(300)
+        time.sleep(180)
 
 
 def startServer():
