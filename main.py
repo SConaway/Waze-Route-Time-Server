@@ -8,10 +8,11 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-import WazeRouteCalculator
 import yaml
 
-logLevel = logging.DEBUG
+import Route
+
+logLevel = logging.INFO
 logging.basicConfig(level=logLevel)
 
 yamlFilePath = "example-config.yaml"
@@ -28,31 +29,6 @@ class Message():
 
     def update(self, m):
         self.message = m
-
-
-class Route():
-    def __init__(self, f, t, re):
-        self.from_address = f
-        self.to_address = t
-        self.region = re
-        self.color = "default"
-        if self.region == "US" or self.region == "NA":
-            self.units = "mi"
-        else:
-            self.units = "km"
-        self.r = WazeRouteCalculator.WazeRouteCalculator(
-            self.from_address, self.to_address, self.region, log_lvl=logLevel)
-
-    def get_info(self):
-        try:
-            results = self.r.calc_route_info()
-        except WazeRouteCalculator.WRCError as err:
-            logging.info("Sleeping for 10 seconds due to error: " + str(err))
-            time.sleep(10)
-            results = get_info(self.from_address, self.to_address, self.region)
-        # TODO: convert to miles if unit is mi
-        return (round(results[0], 2), round(results[1], 2),
-                self.units, self.color)
 
 
 class HTTPServer_RequestHandler(BaseHTTPRequestHandler):
@@ -90,22 +66,18 @@ def refresh():
     for route in config:
         i = i + 1
         logging.info(config[route])
-        r = Route(
-            config[route]["from"],
-            config[route]["to"],
-            config[route]["region"])
+        r = Route.Route(config[route]['from'], config[route]['to'], config[route]['region'], logLevel)
         route_time, route_dist, route_units, route_color = r.get_info()
         del r
         logging.info("Time: %s minutes, Distance: %s %s",
                      route_time, route_dist, route_units)
         str = dict()
-        str['name'] = config[route]["name"]
+        str['name'] = config[route]['name']
         str['time'] = route_time
         str['dist'] = route_dist
         str['units'] = route_units
         str['color'] = route_color
         data[i] = str
-        time.sleep(1)
     data['lastUpdatedTime'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     json_data = json.dumps(data)
     logging.info(json_data)
