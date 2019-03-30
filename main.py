@@ -88,7 +88,7 @@ def refresh():
 def poll():
     while True:
         refresh()
-        time.sleep(180)
+        time.sleep(60)
 
 
 def startServer():

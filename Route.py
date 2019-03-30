@@ -21,6 +21,7 @@ class Route:
     def get_info(self):
         try:
             results = self.r.calc_route_info()
+            del self.r
         except WazeRouteCalculator.WRCError as err:
             logging.info("Sleeping for 10 seconds due to error: " + str(err))
             import time
@@ -29,6 +30,9 @@ class Route:
             results = self.get_info()
         # TODO: convert to miles if unit is mi
         time = round(results[0], 2)
-        dist = round(results[1], 2)
+        if self.region == "US" or self.region == "NA":
+            dist = round((results[1] * 0.62137119223733), 6)
+        else:
+            dist = round(results[1], 2)
         color = "default"
         return time, dist, self.units, color
