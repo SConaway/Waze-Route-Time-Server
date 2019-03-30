@@ -28,11 +28,7 @@ class Route:
             time.sleep(10)
             del time
             results = self.get_info()
-        # TODO: convert to miles if unit is mi
         time = round(results[0], 2)
-        if self.region == "US" or self.region == "NA":
-            dist = round((results[1] * 0.62137119223733), 6)
-        else:
-            dist = round(results[1], 2)
+        dist = round(results[1], 2)
         color = "default"
         return time, dist, self.units, color
